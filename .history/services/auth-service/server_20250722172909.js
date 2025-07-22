@@ -10,43 +10,6 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Bilingual messages
-const messages = {
-  en: {
-    missingFields: 'Missing required fields',
-    userRegistered: 'User registered successfully',
-    userExists: 'Username or email already exists',
-    missingCredentials: 'Missing username or password',
-    invalidCredentials: 'Invalid credentials',
-    loginSuccess: 'Login successful',
-    tokenRequired: 'Token is required',
-    invalidToken: 'Invalid token',
-    internalError: 'Internal server error',
-    healthy: 'healthy',
-    authService: 'auth-service'
-  },
-  ar: {
-    missingFields: 'الحقول المطلوبة مفقودة',
-    userRegistered: 'تم تسجيل المستخدم بنجاح',
-    userExists: 'اسم المستخدم أو البريد الإلكتروني موجود بالفعل',
-    missingCredentials: 'اسم المستخدم أو كلمة المرور مفقودة',
-    invalidCredentials: 'بيانات الاعتماد غير صحيحة',
-    loginSuccess: 'تم تسجيل الدخول بنجاح',
-    tokenRequired: 'الرمز المطلوب',
-    invalidToken: 'رمز غير صحيح',
-    internalError: 'خطأ في الخادم الداخلي',
-    healthy: 'صحي',
-    authService: 'خدمة المصادقة'
-  }
-};
-
-// Function to get message based on Accept-Language header
-function getMessage(req, key) {
-  const acceptLanguage = req.headers['accept-language'] || 'en';
-  const lang = acceptLanguage.startsWith('ar') ? 'ar' : 'en';
-  return messages[lang][key] || messages.en[key];
-}
-
 // Prometheus metrics
 const register = promClient.register;
 const httpRequestDurationMicroseconds = new promClient.Histogram({
@@ -93,10 +56,7 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: getMessage(req, 'healthy'), 
-    service: getMessage(req, 'authService') 
-  });
+  res.status(200).json({ status: 'healthy', service: 'auth-service' });
 });
 
 // Metrics endpoint
@@ -135,7 +95,7 @@ app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     
     if (!username || !email || !password) {
-      return res.status(400).json({ error: getMessage(req, 'missingFields') });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -148,15 +108,15 @@ app.post('/register', async (req, res) => {
     client.release();
 
     res.status(201).json({
-      message: getMessage(req, 'userRegistered'),
+      message: 'User registered successfully',
       user: result.rows[0]
     });
   } catch (err) {
     if (err.code === '23505') { // Unique constraint violation
-      return res.status(409).json({ error: getMessage(req, 'userExists') });
+      return res.status(409).json({ error: 'Username or email already exists' });
     }
     console.error('Registration error:', err);
-    res.status(500).json({ error: getMessage(req, 'internalError') });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -166,7 +126,7 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
     if (!username || !password) {
-      return res.status(400).json({ error: getMessage(req, 'missingCredentials') });
+      return res.status(400).json({ error: 'Missing username or password' });
     }
 
     const client = await pool.connect();
@@ -177,14 +137,14 @@ app.post('/login', async (req, res) => {
     client.release();
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: getMessage(req, 'invalidCredentials') });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const user = result.rows[0];
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: getMessage(req, 'invalidCredentials') });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
@@ -194,7 +154,7 @@ app.post('/login', async (req, res) => {
     );
 
     res.json({
-      message: getMessage(req, 'loginSuccess'),
+      message: 'Login successful',
       token,
       user: {
         id: user.id,
@@ -204,7 +164,7 @@ app.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: getMessage(req, 'internalError') });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -214,7 +174,7 @@ app.post('/verify', (req, res) => {
     const { token } = req.body;
     
     if (!token) {
-      return res.status(400).json({ error: getMessage(req, 'tokenRequired') });
+      return res.status(400).json({ error: 'Token is required' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
@@ -226,7 +186,7 @@ app.post('/verify', (req, res) => {
       }
     });
   } catch (err) {
-    res.status(401).json({ error: getMessage(req, 'invalidToken') });
+    res.status(401).json({ error: 'Invalid token' });
   }
 });
 

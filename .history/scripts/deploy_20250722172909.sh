@@ -41,8 +41,6 @@ kubectl apply -f k8s/autoscaling/
 
 echo "📊 Deploying monitoring..."
 kubectl apply -f k8s/monitoring/
-echo "🔔 Deploying Alertmanager configuration..."
-kubectl apply -f k8s/monitoring/alertmanager-config.yaml
 
 echo "⏳ Waiting for all pods to be ready..."
 kubectl wait --for=condition=ready pod -l app=auth-service -n auth --timeout=300s

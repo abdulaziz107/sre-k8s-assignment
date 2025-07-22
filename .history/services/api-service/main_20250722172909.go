@@ -25,37 +25,6 @@ type Post struct {
 	Content string `json:"content"`
 }
 
-// Bilingual messages
-var messages = map[string]map[string]string{
-	"en": {
-		"apiRunning":     "API Service is running",
-		"healthy":        "healthy",
-		"apiService":     "api-service",
-		"methodNotAllowed": "Method not allowed",
-		"serviceUnavailable": "Service unavailable",
-		"failedRequest":  "Failed to create request",
-		"filenameRequired": "Filename required",
-	},
-	"ar": {
-		"apiRunning":     "خدمة API تعمل",
-		"healthy":        "صحي",
-		"apiService":     "خدمة-API",
-		"methodNotAllowed": "الطريقة غير مسموح بها",
-		"serviceUnavailable": "الخدمة غير متاحة",
-		"failedRequest":  "فشل في إنشاء الطلب",
-		"filenameRequired": "اسم الملف مطلوب",
-	},
-}
-
-// Function to get message based on Accept-Language header
-func getMessage(req *http.Request, key string) string {
-	acceptLanguage := req.Header.Get("Accept-Language")
-	if strings.HasPrefix(acceptLanguage, "ar") {
-		return messages["ar"][key]
-	}
-	return messages["en"][key]
-}
-
 // Internal service URLs (Kubernetes DNS)
 var authServiceURL = "http://auth-service.auth.svc.cluster.local:3001"
 var imageServiceURL = "http://image-storage-service.image-storage.svc.cluster.local:3003"
@@ -68,7 +37,7 @@ func proxyToService(w http.ResponseWriter, r *http.Request, baseURL, path string
 	req, err := http.NewRequest(r.Method, url, bytes.NewReader(body))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "failedRequest"))))
+		w.Write([]byte(`{"error":"Failed to create request"}`))
 		return
 	}
 	// Copy headers
@@ -79,7 +48,7 @@ func proxyToService(w http.ResponseWriter, r *http.Request, baseURL, path string
 	resp, err := client.Do(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
-		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "serviceUnavailable"))))
+		w.Write([]byte(`{"error":"Service unavailable"}`))
 		return
 	}
 	defer resp.Body.Close()
@@ -96,7 +65,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]interface{}{
-			"message": getMessage(r, "apiRunning"),
+			"message": "API Service is running",
 			"version": "1.0.0",
 			"endpoints": []string{
 				"/health",
@@ -116,8 +85,8 @@ func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := HealthResponse{
-			Status:    getMessage(r, "healthy"),
-			Service:   getMessage(r, "apiService"),
+			Status:    "healthy",
+			Service:   "api-service",
 			Timestamp: time.Now().Unix(),
 		}
 		json.NewEncoder(w).Encode(response)
@@ -147,7 +116,7 @@ func main() {
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, authServiceURL, "/register")
@@ -156,7 +125,7 @@ func main() {
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, authServiceURL, "/login")
@@ -165,7 +134,7 @@ func main() {
 	http.HandleFunc("/verify", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, authServiceURL, "/verify")
@@ -175,7 +144,7 @@ func main() {
 	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, imageServiceURL, "/api/upload")
@@ -185,7 +154,7 @@ func main() {
 	http.HandleFunc("/images", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, imageServiceURL, "/api/images")
@@ -196,7 +165,7 @@ func main() {
 		filename := strings.TrimPrefix(r.URL.Path, "/images/")
 		if filename == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "filenameRequired"))))
+			w.Write([]byte(`{"error":"Filename required"}`))
 			return
 		}
 		var methodPath string
@@ -206,7 +175,7 @@ func main() {
 			methodPath = "/api/images/" + filename
 		} else {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, imageServiceURL, methodPath)
@@ -216,7 +185,7 @@ func main() {
 	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, getMessage(r, "methodNotAllowed"))))
+			w.Write([]byte(`{"error":"Method not allowed"}`))
 			return
 		}
 		proxyToService(w, r, imageServiceURL, "/api/stats")

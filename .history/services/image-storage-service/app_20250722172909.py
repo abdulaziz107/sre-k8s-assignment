@@ -13,38 +13,6 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Bilingual messages
-messages = {
-    'en': {
-        'imageServiceRunning': 'Image Storage Service is running',
-        'healthy': 'healthy',
-        'imageStorageService': 'image-storage-service',
-        'authHeaderRequired': 'Authorization header required',
-        'invalidToken': 'Invalid token',
-        'failedToListImages': 'Failed to list images',
-        'failedToGetStats': 'Failed to get stats',
-        'uploadReady': 'Upload endpoint ready',
-        'implemented': 'implemented'
-    },
-    'ar': {
-        'imageServiceRunning': 'خدمة تخزين الصور تعمل',
-        'healthy': 'صحي',
-        'imageStorageService': 'خدمة-تخزين-الصور',
-        'authHeaderRequired': 'رأس التفويض مطلوب',
-        'invalidToken': 'رمز غير صحيح',
-        'failedToListImages': 'فشل في قائمة الصور',
-        'failedToGetStats': 'فشل في الحصول على الإحصائيات',
-        'uploadReady': 'نقطة رفع جاهزة',
-        'implemented': 'مفعل'
-    }
-}
-
-def get_message(request, key):
-    """Get message based on Accept-Language header"""
-    accept_language = request.headers.get('Accept-Language', 'en')
-    lang = 'ar' if accept_language.startswith('ar') else 'en'
-    return messages[lang].get(key, messages['en'].get(key))
-
 # Prometheus metrics
 REQUEST_COUNT = Counter('http_requests_total', 'Total HTTP requests', ['method', 'endpoint', 'status'])
 REQUEST_LATENCY = Histogram('http_request_duration_seconds', 'HTTP request latency', ['method', 'endpoint'])
@@ -100,12 +68,12 @@ def auth_required(f):
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': get_message(request, 'authHeaderRequired')}), 401
+            return jsonify({'error': 'Authorization header required'}), 401
         
         token = auth_header.split(' ')[1]
         payload = verify_jwt_token(token)
         if not payload:
-            return jsonify({'error': get_message(request, 'invalidToken')}), 401
+            return jsonify({'error': 'Invalid token'}), 401
         
         request.user_id = payload.get('user_id')
         request.username = payload.get('username')
@@ -130,8 +98,8 @@ def after_request(response):
 @app.route('/health')
 def health_check():
     return jsonify({
-        'status': get_message(request, 'healthy'),
-        'service': get_message(request, 'imageStorageService'),
+        'status': 'healthy',
+        'service': 'image-storage-service',
         'timestamp': datetime.utcnow().isoformat()
     })
 
@@ -142,7 +110,7 @@ def metrics():
 @app.route('/')
 def root():
     return jsonify({
-        'message': get_message(request, 'imageServiceRunning'),
+        'message': 'Image Storage Service is running',
         'version': '1.0.0',
         'endpoints': [
             '/health',
@@ -183,14 +151,14 @@ def list_images_route():
         return jsonify({'images': images}), 200
         
     except Exception as e:
-        return jsonify({'error': f"{get_message(request, 'failedToListImages')}: {str(e)}"}), 500
+        return jsonify({'error': f'Failed to list images: {str(e)}'}), 500
 
 @app.route('/api/upload', methods=['POST'])
 @auth_required
 def upload_image_route():
     return jsonify({
-        'message': get_message(request, 'uploadReady'),
-        'status': get_message(request, 'implemented')
+        'message': 'Upload endpoint ready',
+        'status': 'implemented'
     }), 200
 
 @app.route('/api/stats', methods=['GET'])
@@ -220,7 +188,7 @@ def get_stats_route():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': f"{get_message(request, 'failedToGetStats')}: {str(e)}"}), 500
+        return jsonify({'error': f'Failed to get stats: {str(e)}'}), 500
 
 if __name__ == '__main__':
     # Initialize database
