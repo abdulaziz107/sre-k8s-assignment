@@ -4,6 +4,13 @@
 # This script demonstrates various failure scenarios and recovery mechanisms
 set -e
 
+# Ensure script is run from project root
+if [ ! -f "k8s/namespaces/namespaces.yaml" ] || [ ! -d "services" ]; then
+    echo "❌ Error: This script must be run from the project root directory"
+    echo "Please run: cd /path/to/sre-k8s-assignment && ./scripts/failure-simulation.sh"
+    exit 1
+fi
+
 echo "🧪 SRE Assignment - Complete Failure Simulation"
 echo "=============================================="
 echo ""

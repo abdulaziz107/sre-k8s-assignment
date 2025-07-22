@@ -4,6 +4,13 @@
 # This script handles the complete deployment process including build, push, deploy, and testing
 set -e
 
+# Ensure script is run from project root
+if [ ! -f "k8s/namespaces/namespaces.yaml" ] || [ ! -d "services" ]; then
+    echo "❌ Error: This script must be run from the project root directory"
+    echo "Please run: cd /path/to/sre-k8s-assignment && ./scripts/deploy.sh"
+    exit 1
+fi
+
 echo "🚀 SRE Assignment - Complete Deployment Script"
 echo "============================================="
 echo ""
@@ -64,10 +71,13 @@ check_prerequisites() {
 build_and_push_images() {
     echo -e "${BLUE}🔨 Building and pushing Docker images...${NC}"
     
-    # Get Docker Hub username
-    DOCKER_USERNAME=$(grep -o 'abdulaziz[0-9]*' scripts/build-and-push.sh | head -1)
-    if [ -z "$DOCKER_USERNAME" ]; then
-        DOCKER_USERNAME="abdulaziz5107"
+    # Get Docker Hub username - try to extract from build script or use default
+    DOCKER_USERNAME="abdulaziz5107"
+    if [ -f "scripts/build-and-push.sh" ]; then
+        EXTRACTED_USERNAME=$(grep -o 'abdulaziz[0-9]*' scripts/build-and-push.sh | head -1)
+        if [ -n "$EXTRACTED_USERNAME" ]; then
+            DOCKER_USERNAME="$EXTRACTED_USERNAME"
+        fi
     fi
     
     echo "Using Docker Hub username: $DOCKER_USERNAME"

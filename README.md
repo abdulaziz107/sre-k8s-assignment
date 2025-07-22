@@ -51,6 +51,7 @@ cd sre-k8s-assignment
 minikube start
 
 # Run complete deployment (builds, pushes, deploys, tests)
+# Make sure you're in the project root directory
 bash scripts/deploy.sh
 ```
 
