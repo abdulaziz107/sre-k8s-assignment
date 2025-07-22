@@ -67,7 +67,11 @@ minikube start
 ```
 3. **Build & Push Images:**
    ```sh
+# Standard build (single architecture)
 ./scripts/build-and-push.sh
+
+# Multi-architecture build (linux/amd64, linux/arm64)
+./scripts/build-multiarch.sh
 ```
 4. **Deploy to Kubernetes:**
    ```sh
@@ -94,6 +98,7 @@ bash scripts/setup-notifications.sh
 ## Features & SRE Goals
 - **Isolation:** Namespaces, NetworkPolicies, and Secrets for all services.
 - **Containerization:** Multi-stage Dockerfiles, non-root users, resource limits.
+- **Multi-Architecture:** Support for linux/amd64 and linux/arm64 platforms.
 - **Deployment:** Separate YAMLs for Deployments, Services, Ingress, HPA, PDB, etc.
 - **Security:** TLS via Ingress, network-level isolation, secrets management.
 - **Observability:** Prometheus metrics, Grafana dashboards, Alertmanager rules.
