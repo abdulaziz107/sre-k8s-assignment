@@ -102,6 +102,29 @@ helm install monitoring prometheus-community/kube-prometheus-stack --namespace m
   - Add backup/restore automation for DB and MinIO.
   - Expand alerting to cover more business-level SLOs.
 
+> **Note on Secret Management:**
+> For production environments, it is highly recommended to use an external secret manager such as [HashiCorp Vault](https://www.vaultproject.io/), [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), or [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault/) instead of Kubernetes Secrets. These tools provide advanced encryption, access control, audit logging, and secret rotation. Integration with Kubernetes can be achieved via CSI drivers or dedicated operators.
+
+---
+
+## Summary Table
+
+| Area                | Current State         | Best Practice / Missing                |
+|---------------------|----------------------|----------------------------------------|
+| Namespaces          | Used                 | ✅                                     |
+| NetworkPolicy       | Used                 | ✅                                     |
+| Secrets             | K8s Secrets          | Use Vault/Secrets Manager              |
+| TLS                 | Ingress w/ TLS       | ✅                                     |
+| RBAC                | Not defined          | Add RBAC per namespace                 |
+| Pod Security        | Non-root             | Enforce PodSecurityAdmission           |
+| Image Security      | Multi-stage, non-root| Add image scanning in CI/CD            |
+| Audit Logging       | Not mentioned        | Enable K8s & app audit logs            |
+| Backups             | Not automated        | Add backup/restore for DB & MinIO      |
+| Tracing             | Not present          | Add Jaeger/OpenTelemetry               |
+| Ingress Security    | TLS only             | Add WAF/rate limiting if public        |
+| Resource Quotas     | Per-pod only         | Add namespace quotas                   |
+| CI/CD               | Manual scripts       | Use GitHub Actions or similar          |
+
 ---
 
 ## File Structure
