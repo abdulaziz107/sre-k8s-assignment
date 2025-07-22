@@ -6,16 +6,17 @@ SRE Assignment - System Architecture Diagram
                     │   Clients       │
                     └─────────┬───────┘
                               │ HTTPS/TLS
+                    ┌─────────┴───────┐
+                    │   Load          │
+                    │   Balancer      │
+                    └─────────┬───────┘  
+                              |
+                              │
                               ▼
                     ┌─────────────────┐
                     │   Ingress       │
                     │   Controller    │
                     │   (NGINX)       │
-                    └─────────┬───────┘
-                              │
-                    ┌─────────┴───────┐
-                    │   Load          │
-                    │   Balancer      │
                     └─────────┬───────┘
                               │
         ┌─────────────────────┼─────────────────────┐
