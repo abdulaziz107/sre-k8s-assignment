@@ -1,0 +1,164 @@
+SRE Assignment - System Architecture Diagram
+============================================
+
+                    ┌─────────────────┐
+                    │   External      │
+                    │   Clients       │
+                    └─────────┬───────┘
+                              │ HTTPS/TLS
+                              ▼
+                    ┌─────────────────┐
+                    │   Ingress       │
+                    │   Controller    │
+                    │   (NGINX)       │
+                    └─────────┬───────┘
+                              │
+                    ┌─────────┴───────┐
+                    │   Load          │
+                    │   Balancer      │
+                    └─────────┬───────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│   Auth        │    │   API         │    │   Image       │
+│   Service     │    │   Service     │    │   Storage     │
+│   (Node.js)   │    │   (Go)        │    │   Service     │
+│   Port: 3001  │    │   Port: 3002  │    │   (Python)    │
+│               │    │               │    │   Port: 3003  │
+│   • Register  │    │   • Posts     │    │               │
+│   • Login     │    │   • Auth      │    │   • Upload    │
+│   • Verify    │    │   • Business  │    │   • Download  │
+│   • Health    │    │   • Health    │    │   • Delete    │
+│   • Metrics   │    │   • Metrics   │    │   • Health    │
+└───────┬───────┘    └───────┬───────┘    └───────┬───────┘
+        │                    │                    │
+        │                    │                    │
+        ▼                    ▼                    ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│   PostgreSQL  │    │   PostgreSQL  │    │   PostgreSQL  │
+│   (auth_db)   │    │   (api_db)    │    │   (image_db)  │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                    │                    │
+        │                    │                    │
+        └────────────────────┼────────────────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   MinIO         │
+                    │   Object        │
+                    │   Storage       │
+                    │   (images)      │
+                    └─────────────────┘
+
+                    ┌─────────────────┐
+                    │   Monitoring    │
+                    │   Stack         │
+                    │                 │
+                    │   • Prometheus  │
+                    │   • Grafana     │
+                    │   • Alertmanager│
+                    └─────────────────┘
+
+Security & Networking:
+=====================
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Network Policies                        │
+├─────────────────────────────────────────────────────────────┤
+│ • Auth Service: API + Monitoring access only              │
+│ • API Service: External + Auth + Infrastructure access    │
+│ • Image Service: API + Monitoring + Infrastructure access │
+│ • Infrastructure: Service access only                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Security Features                       │
+├─────────────────────────────────────────────────────────────┤
+│ • TLS/SSL encryption for all external traffic            │
+│ • JWT token-based authentication                          │
+│ • Kubernetes secrets for sensitive data                   │
+│ • Non-root containers with security contexts              │
+│ • Read-only filesystems where possible                    │
+└─────────────────────────────────────────────────────────────┘
+
+Autoscaling & High Availability:
+===============================
+
+┌─────────────────────────────────────────────────────────────┐
+│                 Horizontal Pod Autoscaler                  │
+├─────────────────────────────────────────────────────────────┤
+│ • Auth Service: 2-10 replicas (CPU/Memory based)         │
+│ • API Service: 2-15 replicas (CPU/Memory based)          │
+│ • Image Service: 2-20 replicas (CPU/Memory based)        │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                Pod Disruption Budgets                     │
+├─────────────────────────────────────────────────────────────┤
+│ • Minimum 1 replica available during node drains         │
+│ • Ensures service availability during maintenance         │
+└─────────────────────────────────────────────────────────────┘
+
+Observability:
+==============
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Metrics Collection                      │
+├─────────────────────────────────────────────────────────────┤
+│ • HTTP request rates and latencies                        │
+│ • Error rates and status codes                            │
+│ • Resource usage (CPU, Memory)                            │
+│ • Custom business metrics                                 │
+│ • Database connection metrics                             │
+│ • Storage usage metrics                                   │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Alerting Rules                         │
+├─────────────────────────────────────────────────────────────┤
+│ • High error rates (>5%)                                 │
+│ • Service unavailability                                  │
+│ • High resource usage (>80%)                              │
+│ • Database connection issues                              │
+│ • Storage access problems                                 │
+└─────────────────────────────────────────────────────────────┘
+
+Namespace Organization:
+======================
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Kubernetes Namespaces                   │
+├─────────────────────────────────────────────────────────────┤
+│ • auth/          - Authentication service                 │
+│ • api/           - API gateway service                   │
+│ • image-storage/ - Image storage service                 │
+│ • infrastructure/ - Database and storage                  │
+│ • monitoring/    - Observability stack                   │
+│ • ingress-nginx/ - Ingress controller                    │
+└─────────────────────────────────────────────────────────────┘
+
+Failure Scenarios & Recovery:
+=============================
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Failure Simulation                      │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Database Crash: PostgreSQL pod failure                │
+│ 2. Service Crash: Auth/API/Image service pod failure    │
+│ 3. High Traffic: Load testing with HPA scaling           │
+│ 4. Node Failure: Node drain and pod rescheduling         │
+│ 5. Resource Exhaustion: CPU/Memory stress testing        │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    Recovery Mechanisms                     │
+├─────────────────────────────────────────────────────────────┤
+│ • Automatic pod rescheduling                              │
+│ • Service discovery and load balancing                    │
+│ • Health checks and readiness probes                     │
+│ • Horizontal scaling based on metrics                    │
+│ • Network policy enforcement                              │
+│ • Alert notifications for operators                       │
+└─────────────────────────────────────────────────────────────┘ 

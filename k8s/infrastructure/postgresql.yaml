@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: infrastructure
+  labels:
+    app: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "sre_assignment"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres123"
+        - name: POSTGRES_MULTIPLE_DATABASES
+          value: "auth_db,api_db,image_db"
+        volumeMounts:
+        - name: postgresql-data
+          mountPath: /var/lib/postgresql/data
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgresql-data
+        emptyDir: {}
+      - name: init-script
+        configMap:
+          name: postgresql-init
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-init
+  namespace: infrastructure
+data:
+  init-databases.sh: |
+    #!/bin/bash
+    set -e
+    
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+        CREATE DATABASE auth_db;
+        CREATE DATABASE api_db;
+        CREATE DATABASE image_db;
+        
+        \c auth_db;
+        CREATE USER auth_user WITH PASSWORD 'auth_password';
+        GRANT ALL PRIVILEGES ON DATABASE auth_db TO auth_user;
+        
+        \c api_db;
+        CREATE USER api_user WITH PASSWORD 'api_password';
+        GRANT ALL PRIVILEGES ON DATABASE api_db TO api_user;
+        
+        \c image_db;
+        CREATE USER image_user WITH PASSWORD 'image_password';
+        GRANT ALL PRIVILEGES ON DATABASE image_db TO image_user;
+    EOSQL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: infrastructure
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+  selector:
+    app: postgresql 
