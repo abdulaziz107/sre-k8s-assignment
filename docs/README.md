@@ -114,7 +114,7 @@ sre-k8s-assignment/
 ---
 
 ## 📚 Documentation
-- [Architecture Overview](/architecture-diagram.txt)
+- [Architecture Overview](architecture-diagram.txt)
 - [Local Setup Guide](docs/local-account-setup.md)
 - [Monitoring & Alerts](docs/grafana-dashboards.md)
 
