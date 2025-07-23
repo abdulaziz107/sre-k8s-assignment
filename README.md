@@ -13,7 +13,7 @@ The system also features PostgreSQL databases, MinIO for storage, and monitoring
 ## 🏠 System Architecture
 
 ### Architecture Diagram
-![Architecture Diagram](/doc/sre-k8s-assignment.drawio.png)
+![Architecture Diagram](/docs/sre-k8s-assignment.drawio.png)
 
 ### Service Interactions
 - **Auth Service**: Handles login, registration, and token verification
@@ -73,7 +73,7 @@ kubectl apply -f k8s/autoscaling/
 ## 🎥 Failure Recovery
 
 ### Demo Video
-[Failure Recovery.mov](Failure%20Recovery.mov)
+[Failure Recovery.mov](/docs/Failure%20Recovery.mov)
 
 ### Covered Scenarios
 1. Database crash and recovery
@@ -112,12 +112,12 @@ sre-k8s-assignment/
 ---
 
 ## 📚 Documentation
-- [Architecture Diagram](/doc/architecture-diagram.txt)
-- [Architecture Overview](/doc/architecture.md)
-- [Monitoring System Overview](/doc/System-Overview-Dashboard.png)
-- [Monitoring Image Storage Service](/doc/Image-Storage-Service-Dashboard.png)
-- [Monitoring Auth Service](/doc/Auth-Service-Dashboard.png)
-- [Alerts](/doc/alert.png)
+- [Architecture Diagram](/docs/architecture-diagram.txt)
+- [Architecture Overview](/docs/architecture.md)
+- [Monitoring System Overview](/docs/System-Overview-Dashboard.png)
+- [Monitoring Image Storage Service](/docs/Image-Storage-Service-Dashboard.png)
+- [Monitoring Auth Service](/docs/Auth-Service-Dashboard.png)
+- [Alerts](/docs/alert.png)
 
 ---
 
