@@ -66,9 +66,7 @@ kubectl apply -f k8s/autoscaling/
 - System Overview
 
 ### Alert Integrations
-- Mailgun
 - Slack
-- PagerDuty
 
 ---
 
