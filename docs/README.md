@@ -112,12 +112,12 @@ sre-k8s-assignment/
 ---
 
 ## 📚 Documentation
-- [Architecture Overview](architecture-diagram.txt)
+- [Architecture Diagram](architecture-diagram.txt)
 - [Architecture Overview](architecture.md)
-- [Monitoring & Alerts](System-Overview-Dashboard.png)
-- [Monitoring & Alerts](Image-Storage-Service-Dashboard.png)
-- [Monitoring & Alerts](Auth-Service-Dashboard.png)
-- [Monitoring & Alerts](alert.png)
+- [Monitoring System Overview](System-Overview-Dashboard.png)
+- [Monitoring Image Storage Service](Image-Storage-Service-Dashboard.png)
+- [Monitoring Auth Service](Auth-Service-Dashboard.png)
+- [Alerts](alert.png)
 
 ---
 
