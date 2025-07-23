@@ -1,4 +1,3 @@
-# SRE Kubernetes Assignment
 
 ## Overview
 This project demonstrates a reliable, secure, observable, and scalable microservices system on Kubernetes, as a practical SRE assignment. It includes three web services (Node.js, Go, Python), PostgreSQL, and MinIO, with full CI/CD, monitoring, and disaster recovery features.
@@ -58,28 +57,28 @@ bash scripts/deploy.sh
 ### **Option 2: Step-by-Step Deployment**
 1. **Clone the repo:**
    ```sh
-git clone https://github.com/abdulaziz107/sre-k8s-assignment.git
-cd sre-k8s-assignment
-```
+    git clone https://github.com/abdulaziz107/sre-k8s-assignment.git
+    cd sre-k8s-assignment
+    ```
 2. **Start Minikube:**
    ```sh
-minikube start
-```
+    minikube start
+    ```
 3. **Build & Push Images:**
    ```sh
-# Standard build (single architecture)
-./scripts/build-and-push.sh
+    # Standard build (single architecture)
+    ./scripts/build-and-push.sh
 
-# Multi-architecture build (linux/amd64, linux/arm64)
-./scripts/build-multiarch.sh
-```
+    # Multi-architecture build (linux/amd64, linux/arm64)
+    ./scripts/build-multiarch.sh
+    ```
 4. **Deploy to Kubernetes:**
    ```sh
-bash scripts/deploy.sh
-```
+    bash scripts/deploy.sh
+    ```
 5. **Setup External Notifications (Optional):**
    ```sh
-bash scripts/setup-notifications.sh
+        bash scripts/setup-notifications.sh
    ```
    - Configure Slack, Email, and PagerDuty integrations
    - Follow the interactive prompts to set up webhooks and credentials
