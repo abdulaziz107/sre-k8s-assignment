@@ -13,7 +13,7 @@ The system also features PostgreSQL databases, MinIO for storage, and monitoring
 ## 🏠 System Architecture
 
 ### Architecture Diagram
-![Architecture Diagram](sre-k8s-assignment.drawio.png)
+![Architecture Diagram](/doc/sre-k8s-assignment.drawio.png)
 
 ### Service Interactions
 - **Auth Service**: Handles login, registration, and token verification
