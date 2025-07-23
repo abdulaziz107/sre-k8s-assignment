@@ -73,7 +73,7 @@ kubectl apply -f k8s/autoscaling/
 ## 🎥 Failure Recovery
 
 ### Demo Video
-[Failure Recovery.mov](/docs/Failure%20Recovery.mov)
+[Failure Recovery Video](/docs/Failure Recovery.mov.zip)
 
 ### Covered Scenarios
 1. Database crash and recovery
