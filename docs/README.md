@@ -115,7 +115,7 @@ sre-k8s-assignment/
 
 ## 📚 Documentation
 - [Architecture Overview](architecture-diagram.txt)
-- [Monitoring & Alerts](System Overview Dashboard.png)
+- [Monitoring & Alerts](System-Overview-Dashboard.png)
 
 ---
 
